@@ -4,10 +4,14 @@
 #include "Model.h"
 #include "Utility.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 Shader *Shader::loadShader(
         const std::string &vertexSource,
         const std::string &fragmentSource,
         const std::string &positionAttributeName,
+        const std::string &modelAttributeName,
         const std::string &projectionMatrixUniformName) {
     Shader *shader = nullptr;
 
@@ -51,15 +55,22 @@ Shader *Shader::loadShader(
                     program,
                     projectionMatrixUniformName.c_str());
 
+            GLint modelMatrixUniform = glGetUniformLocation(
+                    program,
+                    modelAttributeName.c_str());
+
             // Only create a new shader if all the attributes are found.
-            if (positionAttribute != -1
+            if (positionAttribute != -1 &&
+                modelMatrixUniform != -1
                 && projectionMatrixUniform != -1) {
 
                 shader = new Shader(
                         program,
                         positionAttribute,
+                        modelMatrixUniform,
                         projectionMatrixUniform);
             } else {
+                aout << "FAILEEEEEEEEEEEEEEEEEEEED ============================" << std::endl;
                 glDeleteProgram(program);
             }
         }
@@ -128,6 +139,20 @@ void Shader::drawModel(const Model &model) const {
     glDrawElements(GL_TRIANGLES, model.getIndexCount(), GL_UNSIGNED_SHORT, model.getIndexData());
 }
 
-void Shader::setProjectionMatrix(float *projectionMatrix) const {
-    glUniformMatrix4fv(projectionMatrix_, 1, false, projectionMatrix);
+void Shader::setProjectionMatrix(float h, float w) const {
+
+    glm::vec2 size = glm::vec2(50.0f, 50.0f);
+
+    glm::mat4 ml = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+    ml = glm::translate(ml, glm::vec3( 0 , h - 200, 0.0f));
+
+
+    ml = glm::scale(ml, glm::vec3(glm::vec2(200.0f, 200.0f), 1.0f));
+
+    glm::mat4 projection(1.0f);
+    projection = glm::ortho(0.0f, (float)w, (float)h, 0.0f, -1.0f, 0.0f);
+
+    glUniformMatrix4fv(projectionMatrix_, 1, false, glm::value_ptr(projection));
+
+    glUniformMatrix4fv(model_, 1, false, glm::value_ptr(ml));
 }

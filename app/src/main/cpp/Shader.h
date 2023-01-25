@@ -31,6 +31,7 @@ public:
             const std::string &vertexSource,
             const std::string &fragmentSource,
             const std::string &positionAttributeName,
+            const std::string &modelAttributeName,
             const std::string &projectionMatrixUniformName);
 
     inline ~Shader() {
@@ -60,7 +61,7 @@ public:
      * Sets the model/view/projection matrix in the shader.
      * @param projectionMatrix sixteen floats, column major, defining an OpenGL projection matrix.
      */
-    void setProjectionMatrix(float *projectionMatrix) const;
+    void setProjectionMatrix(float h, float w) const;
 
 private:
     /*!
@@ -81,13 +82,16 @@ private:
     constexpr Shader(
             GLuint program,
             GLint position,
+            GLint model,
             GLint projectionMatrix)
             : program_(program),
               position_(position),
+              model_(model),
               projectionMatrix_(projectionMatrix) {}
 
     GLuint program_;
     GLint position_;
+    GLint model_;
     GLint projectionMatrix_;
 };
 

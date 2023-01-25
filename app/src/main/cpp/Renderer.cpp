@@ -41,9 +41,10 @@ static const char *vertex = R"vertex(#version 300 es
 in vec3 inPosition;
 
 uniform mat4 uProjection;
+uniform mat4 model;
 
 void main() {
-    gl_Position = uProjection * vec4(inPosition, 1.0);
+    gl_Position = uProjection * model * vec4(inPosition, 1.0);
 }
 )vertex";
 
@@ -116,7 +117,7 @@ void Renderer::render() {
         // send the matrix to the shader
         // Note: the shader must be active for this to work. Since we only have one shader for this
         // demo, we can assume that it's active.
-        shader_->setProjectionMatrix(projectionMatrix);
+        shader_->setProjectionMatrix(height_, width_);
 
         // make sure the matrix isn't generated every frame
         shaderNeedsNewProjectionMatrix_ = false;
@@ -212,10 +213,12 @@ void Renderer::initRenderer() {
     PRINT_GL_STRING(GL_VERSION);
     PRINT_GL_STRING_AS_LIST(GL_EXTENSIONS);
 
-    shader_ = std::unique_ptr<Shader>(
-            Shader::loadShader(vertex, fragment, "inPosition", "uProjection"));
-    assert(shader_);
 
+
+    shader_ = std::unique_ptr<Shader>(
+            Shader::loadShader(vertex, fragment, "inPosition", "model", "uProjection"));
+    assert(shader_);
+    aout << "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE" << std::endl;
     // Note: there's only one shader in this demo, so I'll activate it here. For a more complex game
     // you'll want to track the active shader and activate/deactivate it as necessary
     shader_->activate();
@@ -260,14 +263,19 @@ void Renderer::createModels() {
      * |   \ |
      * 3 --- 2
      */
+
+
+
+
     std::vector<Vertex> vertices = {
-            Vertex(Vector3{1, 1, 0}, Vector2{0, 0}), // 0
-            Vertex(Vector3{-1, 1, 0}, Vector2{1, 0}), // 1
-            Vertex(Vector3{-1, -1, 0}, Vector2{1, 1}), // 2
-            Vertex(Vector3{1, -1, 0}, Vector2{0, 1}) // 3
+            Vertex(Vector3{1.0f,  1.0f, 0.0f}, Vector2{0, 0}), // 0
+            Vertex(Vector3{1.0f, 0.0f, 0.0f}, Vector2{1, 0}), // 1
+            Vertex(Vector3{0.0f, 1.0f, 0.0f}, Vector2{1, 1}), // 2
+            Vertex(Vector3{0.0f, 0.0f, 0.0f}, Vector2{0, 1}) // 3
     };
     std::vector<Index> indices = {
-            0, 1, 2, 0, 2, 3
+            0, 1, 2,
+            3, 2, 1
     };
 
     // loads an image and assigns it to the square.

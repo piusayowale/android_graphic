@@ -14,6 +14,8 @@ project("myapplication")
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
+include_directories(C:/Users/pius.ogunleye/vcpkg/installed/arm64-android/include)
+
 add_library( # Sets the name of the library.
         myapplication
 
